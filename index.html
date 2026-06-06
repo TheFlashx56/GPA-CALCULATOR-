@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GPA Calculator | NUCES Student Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas + jsPDF for download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="no-sidebar">
+
+<div class="m-page">
+
+    <!-- HEADER -->
+    <header class="m-header">
+        <div class="header-inner">
+            <div class="brand-block">
+                <span class="brand-text">NUCES</span>
+                <span class="brand-sub">Student Portal</span>
+            </div>
+            <div class="header-title">
+                <h5>GPA Calculator</h5>
+                <span class="breadcrumb-label"><a href="#">Home</a> &gt; GPA Calculator</span>
+            </div>
+            <div class="header-user">
+                <div class="user-pill" id="user_dropdown" onclick="toggleDropdown(event)">
+                    <i class="fa fa-user-circle"></i>
+                    <span>Student</span>
+                    <i class="fa fa-caret-down" style="font-size:11px;opacity:.7"></i>
+                </div>
+                <div class="user-menu" id="user_menu">
+                    <a href="#"><i class="fa fa-user"></i> My Profile</a>
+                    <div class="sep"></div>
+                    <a href="#" class="logout-link"><i class="fa fa-power-off"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="m-wrapper no-aside">
+
+        <div class="m-subheader">
+            <h3 class="m-subheader__title">GPA Calculator</h3>
+            <span class="breadcrumb-nav">
+                <i class="fa fa-home"></i> &nbsp;—&nbsp; GPA Calculator
+            </span>
+        </div>
+
+        <div class="m-content">
+
+            <!-- ====== EDITABLE INFO BAR ====== -->
+            <div class="info-bar-portlet">
+                <div class="info-bar-body">
+                    <div class="info-field">
+                        <span class="info-label">Program</span>
+                        <input type="text" id="infoProgram" class="info-input" placeholder="e.g. BS-CS" value="BS-CS">
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Semester</span>
+                        <select id="infoSemester" class="info-select">
+                            <option value="Current">Current</option>
+                            <option value="Next">Next</option>
+                            <option value="Previous">Previous</option>
+                        </select>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Campus</span>
+                        <select id="infoCampus" class="info-select">
+                            <option value="Peshawar">Peshawar</option>
+                            <option value="Lahore">Lahore</option>
+                            <option value="Islamabad">Islamabad</option>
+                            <option value="Karachi">Karachi</option>
+                            <option value="Faisalabad">Faisalabad</option>
+                            <option value="Multan">Multan</option>
+                        </select>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Session</span>
+                        <div class="session-combo">
+                            <select id="infoSessionTerm" class="info-select session-term">
+                                <option value="Spring">Spring</option>
+                                <option value="Fall" selected>Fall</option>
+                                <option value="Summer">Summer</option>
+                            </select>
+                            <input type="number" id="infoSessionYear" class="info-input session-year" placeholder="Year" value="2026" min="2000" max="2099">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== CURRENT ACADEMIC STATUS ====== -->
+            <div class="m-portlet">
+                <div class="m-portlet__head">
+                    <h3 class="m-portlet__head-text"><i class="fa fa-chart-line"></i> Current Academic Status</h3>
+                </div>
+                <div class="m-portlet__body">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label"><i class="fa fa-graduation-cap"></i> Current CGPA</label>
+                            <input type="number" id="currentGPA" class="m-input" placeholder="e.g., 3.50" step="0.01" min="0" max="4">
+                            <span class="form-hint">Enter your existing CGPA (0.00 – 4.00)</span>
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label"><i class="fa fa-award"></i> Total Credits Earned</label>
+                            <input type="number" id="currentCredits" class="m-input" placeholder="Total credits completed" min="0" step="0.5">
+                            <span class="form-hint">Credits completed before this semester</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== SEMESTER COURSES ====== -->
+            <div class="m-portlet">
+                <div class="m-portlet__head">
+                    <h3 class="m-portlet__head-text"><i class="fa fa-book-open"></i> Semester Courses</h3>
+                    <span class="badge-course-count" id="courseCount">5 Courses</span>
+                </div>
+                <div class="m-portlet__body">
+                    <!-- Optional columns toggle -->
+                    <div class="optional-cols-bar">
+                        <span class="opt-bar-label"><i class="fa fa-sliders-h"></i> Optional columns:</span>
+                        <label class="opt-toggle">
+                            <input type="checkbox" id="col-code" onchange="toggleColumn('code', this.checked)">
+                            <span class="opt-chip">Course Code</span>
+                        </label>
+                        <label class="opt-toggle">
+                            <input type="checkbox" id="col-name" onchange="toggleColumn('name', this.checked)">
+                            <span class="opt-chip">Course Name</span>
+                        </label>
+                        <label class="opt-toggle">
+                            <input type="checkbox" id="col-section" onchange="toggleColumn('section', this.checked)">
+                            <span class="opt-chip">Section</span>
+                        </label>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table m-table table-bordered table-striped" id="courseTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:46px">#</th>
+                                    <th class="col-code" style="display:none; min-width:100px">Course Code</th>
+                                    <th class="col-name" style="display:none; min-width:160px">Course Name</th>
+                                    <th class="col-section" style="display:none; min-width:90px">Section</th>
+                                    <th style="min-width:110px">Credits</th>
+                                    <th style="min-width:130px">Grade</th>
+                                    <th class="text-center" style="width:88px">Repeat?</th>
+                                    <th style="min-width:130px">Prev Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="course-actions">
+                        <button class="btn btn-info" onclick="addRow()">
+                            <i class="fa fa-plus-circle"></i> Add Course
+                        </button>
+                        <button class="btn btn-danger" onclick="clearRows()">
+                            <i class="fa fa-trash-alt"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== ACTION BUTTONS ====== -->
+            <div class="calculate-actions">
+                <button class="btn btn-brand btn-air" onclick="calculate()">
+                    <i class="fa fa-calculator"></i> Calculate Results
+                </button>
+                <button class="btn btn-secondary" onclick="resetAll()">
+                    <i class="fa fa-redo-alt"></i> Reset All
+                </button>
+            </div>
+
+            <!-- ====== RESULTS ====== -->
+            <div class="m-portlet results-portlet" id="output">
+                <div class="m-portlet__head">
+                    <h3 class="m-portlet__head-text"><i class="fa fa-chart-pie"></i> Calculation Results</h3>
+                </div>
+                <div class="m-portlet__body">
+                    <div class="result-widgets">
+                        <div class="result-widget">
+                            <div class="result-icon"><i class="fa fa-star"></i></div>
+                            <div class="result-data">
+                                <div class="result-title">Semester GPA (SGPA)</div>
+                                <div class="result-value" id="sgpa">0.00</div>
+                                <div class="result-sub">Performance this term</div>
+                            </div>
+                        </div>
+                        <div class="result-widget result-widget--success">
+                            <div class="result-icon"><i class="fa fa-graduation-cap"></i></div>
+                            <div class="result-data">
+                                <div class="result-title">Updated CGPA</div>
+                                <div class="result-value" id="cgpa">0.00</div>
+                                <div class="result-sub">New cumulative average</div>
+                            </div>
+                        </div>
+                        <div class="result-widget result-widget--info">
+                            <div class="result-icon"><i class="fa fa-layer-group"></i></div>
+                            <div class="result-data">
+                                <div class="result-title">Total Credits</div>
+                                <div class="result-value" id="totalCredits">0</div>
+                                <div class="result-sub">Total credits completed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DOWNLOAD CARD SECTION -->
+                    <div class="download-section">
+                        <div class="download-section-title">
+                            <i class="fa fa-download"></i> Download Transcript Card
+                        </div>
+                        <div class="download-btns">
+                            <button class="btn btn-download-pdf" onclick="downloadCard('pdf')">
+                                <i class="fa fa-file-pdf"></i> Save as PDF
+                            </button>
+                            <button class="btn btn-download-img" onclick="downloadCard('jpg')">
+                                <i class="fa fa-file-image"></i> Save as JPG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grade scale -->
+                    <div class="gpa-band-section">
+                        <h5 class="gpa-band-title">Grade Point Scale</h5>
+                        <table class="table m-table table-bordered grade-scale-table">
+                            <thead>
+                                <tr><th>Grade</th><th>A</th><th>A-</th><th>B+</th><th>B</th><th>B-</th><th>C+</th><th>C</th><th>C-</th><th>D+</th><th>D</th><th>F</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Points</strong></td>
+                                    <td>4.00</td><td>3.67</td><td>3.33</td><td>3.00</td><td>2.67</td>
+                                    <td>2.33</td><td>2.00</td><td>1.67</td><td>1.33</td><td>1.00</td><td>0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end m-content -->
+    </div><!-- end m-wrapper -->
+
+    <!-- FOOTER -->
+    <footer class="m-footer no-aside">
+        <span>&copy; 2026 NUCES &nbsp;|&nbsp; GPA Calculator</span>
+        <span>Designed for NUCES Students</span>
+    </footer>
+
+</div><!-- end m-page -->
+
+<!-- ====== TRANSCRIPT CARD (hidden, used for download) ====== -->
+<div id="transcriptCard" class="transcript-card-wrap" style="position:fixed;top:-9999px;left:-9999px;z-index:-1;">
+    <div class="tc-card">
+        <!-- Header -->
+        <div class="tc-header">
+            <div class="tc-header-left">
+                <div class="tc-logo-box">
+                    <span class="tc-logo-text">NUCES</span>
+                </div>
+                <div>
+                    <div class="tc-uni-name">National University of Computer &amp; Emerging Sciences</div>
+                    <div class="tc-campus-name" id="tc-campus-name">Peshawar Campus</div>
+                </div>
+            </div>
+            <div class="tc-header-right">
+                <div class="tc-doc-title">GPA Transcript</div>
+                <div class="tc-doc-sub" id="tc-doc-sub">Spring 2026</div>
+            </div>
+        </div>
+
+        <!-- Student info row -->
+        <div class="tc-info-bar">
+            <div class="tc-info-item"><span class="tc-info-key">Program</span><span class="tc-info-val" id="tc-program">BS-CS</span></div>
+            <div class="tc-info-item"><span class="tc-info-key">Semester</span><span class="tc-info-val" id="tc-semester">Current</span></div>
+            <div class="tc-info-item"><span class="tc-info-key">Campus</span><span class="tc-info-val" id="tc-campus">Peshawar</span></div>
+            <div class="tc-info-item"><span class="tc-info-key">Session</span><span class="tc-info-val" id="tc-session">Spring 2026</span></div>
+        </div>
+
+        <!-- Semester section header (like the image) -->
+        <div class="tc-sem-header">
+            <div class="tc-sem-title" id="tc-sem-title">Spring 2026</div>
+            <div class="tc-sem-stats">
+                <span id="tc-cr-att">Cr. Att: 0</span>
+                &nbsp;&nbsp;
+                <span id="tc-cr-ernd">Cr. Ernd: 0</span>
+                &nbsp;&nbsp;
+                <span id="tc-cgpa-stat">CGPA: 0.00</span>
+                &nbsp;&nbsp;
+                <span id="tc-sgpa-stat">SGPA: 0.00</span>
+            </div>
+        </div>
+
+        <!-- Course table (exactly like the image) -->
+        <table class="tc-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th class="tc-wide">Course Name</th>
+                    <th>Section</th>
+                    <th>CrdHrs</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                    <th>Type</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="tc-tbody"></tbody>
+        </table>
+
+        <!-- Footer -->
+        <div class="tc-footer">
+            <div class="tc-footer-note">This document is generated by the NUCES GPA Calculator for academic planning purposes only.</div>
+            <div class="tc-footer-right">Generated: <span id="tc-gen-date"></span></div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+// Dropdown
+function toggleDropdown(e) {
+    e.stopPropagation();
+    var m = document.getElementById('user_menu');
+    m.style.display = m.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', function(e) {
+    var m = document.getElementById('user_menu');
+    if (m && !document.getElementById('user_dropdown').contains(e.target)) m.style.display = 'none';
+});
+
+// ====== DOWNLOAD CARD ======
+function getGradeLabel(points) {
+    const gradeMap = {4.0:'A', 3.67:'A-', 3.33:'B+', 3.0:'B', 2.67:'B-', 2.33:'C+', 2.0:'C', 1.67:'C-', 1.33:'D+', 1.0:'D', 0.0:'F'};
+    return gradeMap[parseFloat(points)] || points;
+}
+
+function buildTranscriptCard() {
+    const program    = document.getElementById('infoProgram').value || 'BS-CS';
+    const semester   = document.getElementById('infoSemester').value;
+    const campus     = document.getElementById('infoCampus').value;
+    const term       = document.getElementById('infoSessionTerm').value;
+    const year       = document.getElementById('infoSessionYear').value;
+    const session    = term + ' ' + year;
+
+    const sgpa       = document.getElementById('sgpa').textContent;
+    const cgpa       = document.getElementById('cgpa').textContent;
+    const totalCr    = document.getElementById('totalCredits').textContent;
+    const prevCr     = parseFloat(document.getElementById('currentCredits').value) || 0;
+    const semCr      = parseFloat(totalCr) - prevCr;
+
+    // Fill static fields
+    document.getElementById('tc-campus-name').textContent = campus + ' Campus';
+    document.getElementById('tc-doc-sub').textContent     = session;
+    document.getElementById('tc-program').textContent     = program;
+    document.getElementById('tc-semester').textContent    = semester;
+    document.getElementById('tc-campus').textContent      = campus;
+    document.getElementById('tc-session').textContent     = session;
+    document.getElementById('tc-sem-title').textContent   = session;
+    document.getElementById('tc-cr-att').textContent      = 'Cr. Att: ' + (semCr > 0 ? semCr : totalCr);
+    document.getElementById('tc-cr-ernd').textContent     = 'Cr. Ernd: ' + totalCr;
+    document.getElementById('tc-cgpa-stat').textContent   = 'CGPA: ' + cgpa;
+    document.getElementById('tc-sgpa-stat').textContent   = 'SGPA: ' + sgpa;
+
+    const now = new Date();
+    document.getElementById('tc-gen-date').textContent = now.toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+
+    // Build table rows
+    const tbody   = document.querySelector('#courseTable tbody');
+    const tcTbody = document.getElementById('tc-tbody');
+    tcTbody.innerHTML = '';
+    const rows = tbody.querySelectorAll('tr');
+    let rowNum = 1;
+    rows.forEach(row => {
+        const cr    = row.querySelector('.cr')?.value;
+        const grVal = row.querySelector('.gr')?.value;
+        const rp    = row.querySelector('.rp')?.checked;
+        const old   = row.querySelector('.old')?.value;
+        if (!cr || !grVal) return;
+        const grLabel   = getGradeLabel(grVal);
+        const pts       = parseFloat(grVal).toFixed(2);
+        const remark    = rp ? 'R-1' : '';
+        const codeVal   = row.querySelector('.course-code')?.value.trim()    || `COURSE${String(rowNum).padStart(3,'0')}`;
+        const nameVal   = row.querySelector('.course-name')?.value.trim()    || `Course ${rowNum} (${program})`;
+        const sectVal   = row.querySelector('.course-section')?.value.trim() || `${program.replace(/\s/g,'').substring(0,6)}-${rowNum}`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${codeVal}</td>
+            <td class="tc-wide">${nameVal}</td>
+            <td>${sectVal}</td>
+            <td class="tc-center">${cr}</td>
+            <td class="tc-center">${grLabel}</td>
+            <td class="tc-center">${pts}</td>
+            <td>Core</td>
+            <td>${remark}</td>
+        `;
+        tcTbody.appendChild(tr);
+        rowNum++;
+    });
+}
+
+async function downloadCard(type) {
+    const resultsVisible = document.getElementById('output').classList.contains('show');
+    if (!resultsVisible) {
+        alert('Please calculate results first before downloading the card.');
+        return;
+    }
+
+    buildTranscriptCard();
+
+    const card = document.getElementById('transcriptCard');
+    // Temporarily make visible off-screen with fixed width
+    card.style.position = 'fixed';
+    card.style.top = '-9999px';
+    card.style.left = '0';
+    card.style.zIndex = '-1';
+    card.style.width = '900px';
+    card.style.backgroundColor = '#fff';
+
+    await new Promise(r => setTimeout(r, 100));
+
+    try {
+        const canvas = await html2canvas(card.querySelector('.tc-card'), {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false
+        });
+
+        if (type === 'jpg') {
+            const link = document.createElement('a');
+            link.download = 'NUCES_GPA_Card.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+        } else {
+            const { jsPDF } = window.jspdf;
+            const imgData   = canvas.toDataURL('image/jpeg', 0.95);
+            const pdfW      = 210; // A4 mm
+            const pdfH      = (canvas.height * pdfW) / canvas.width;
+            const pdf       = new jsPDF({ orientation: pdfH > pdfW ? 'portrait' : 'landscape', unit: 'mm', format: [pdfW, pdfH] });
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+            pdf.save('NUCES_GPA_Card.pdf');
+        }
+    } catch(e) {
+        alert('Download failed. Please try again.\n' + e.message);
+    }
+
+    // Hide again
+    card.style.top = '-9999px';
+    card.style.left = '-9999px';
+    card.style.width = '';
+}
+</script>
+</body>
+</html>
